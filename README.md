@@ -13,7 +13,7 @@ you can use this module to easily add priority based states to your humanoids or
 https://www.roblox.com/library/14087292942/Priority3
 
 ### Github:
-[coming]
+https://github.com/HighFlowey/Priority3/blob/main/Priority3.rbxm
 <hr>
 
 # <div align="center">API Document</div>
