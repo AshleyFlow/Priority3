@@ -35,9 +35,11 @@ https://github.com/HighFlowey/Priority3/blob/main/Priority3.rbxm
 
 * state.Checks: **table** --> contains functions that give permission for activating the state
 
-### **Methods**
+### **Functions**
 
 * module.GetClass( object: Instance ): **class**
+
+### **Methods**
 
 * class:SetEnabled( state_name: string, enabled: boolean ): **boolean** --> enables/disables the state and returns its active property
 
