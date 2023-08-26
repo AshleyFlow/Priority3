@@ -1,7 +1,7 @@
 local RunService = game:GetService("RunService")
 
-local HumanoidProperties = require(script:WaitForChild("HumanoidProperties"))
-local Signal = require(script:WaitForChild("Signal")) require(script:WaitForChild("Red"))
+local HumanoidProperties = require(script:WaitForChild("HumanoidProperties")) -- contains presets of states
+local Signal = require(script:WaitForChild("Signal")) require(script:WaitForChild("Red")) -- bindableevent and remotevent
 
 local module = {}
 module.Classes = {}
