@@ -21,6 +21,10 @@ https://github.com/HighFlowey/Priority3/blob/main/Priority3.rbxm
 
 ### **Properties**
 
+* class.State: **string** --> current active state
+
+* ~~class.Priorities.StateName: **state** (read-only)~~ replaced with class.States.StateName but it still works
+
 * class.States.StateName: **state** (read-only)
 
 * state.Properties: **table** → example: {WalkSpeed = 16}
