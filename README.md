@@ -2,8 +2,6 @@
 ## Priority based state machine for Roblox
 <hr>
 
-Priority3 is a module that me and my friends use in all of our projects so I'm always making sure to add useful features to this module and fix its bugs
-
 you can use this module to easily add priority based states to your humanoids or other types of instances and have full control over them
 
 # <div align="center">Get</div>
