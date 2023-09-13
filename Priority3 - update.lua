@@ -5,11 +5,22 @@ local HumanoidProperties = require(script:WaitForChild("HumanoidProperties"))
 -- a module for bindable events and a module for remote events
 local Signal = require(script:WaitForChild("Signal")) require(script:WaitForChild("Red"))
 
+local stateconfig = {}
+stateconfig.Name = "NewState"
+stateconfig.Priority = 0
+stateconfig.Properties = {}
+stateconfig.__index = stateconfig
+
 local statemachine = {}
 statemachine.__index = statemachine
 
 local module = {}
 module.Classes = {}
+
+function module.CreateStateConfig(info: {}): Stateconfig
+	info = info or {}
+	return setmetatable(info, stateconfig)
+end
 
 function module.CreateClass(humanoid: Humanoid): Statemachine
 	local class = setmetatable({}, statemachine)
@@ -46,21 +57,17 @@ function module.CreateClass(humanoid: Humanoid): Statemachine
 	end)
 	
 	for name, config in HumanoidProperties do
-		class.States[name] = {
-			Checks = {},
-			Signal = Signal.new(),
-			PrevEnabled = false,
-			PrevActive = false,
-			Allowed = true, -- checks
-			Enabled = false,
-			Active = false,
+		local config = {
+			Name = name,
 			Priority = config.Priority,
-			Properties = config.Properties,
+			Properties = config.Properties
 		}
+		
+		local newConfig = setmetatable(config, stateconfig)
+		class:AddState(newConfig)
 	end
 	
 	class.Priorities = class.States
-	class:SetEnabled("Default", true)
 	
 	module.Classes[humanoid] = class
 	
@@ -71,6 +78,35 @@ function module.GetClass(humanoid: Humanoid): Statemachine
 	local existingClass = module.Classes[humanoid]
 	
 	return existingClass or module.CreateClass(humanoid)
+end
+
+function statemachine.AddState(self: Statemachine, stateconfig: Stateconfig)
+	stateconfig = stateconfig or module.CreateStateConfig()
+	
+	if self.States[stateconfig.Name] then
+		warn("State with this name already exists:", stateconfig.Name)
+	else
+		self.States[stateconfig.Name] = {
+			Checks = {},
+			Signal = Signal.new(),
+			PrevEnabled = stateconfig.Name == "Default",
+			PrevActive = false,
+			Allowed = true, -- checks
+			Enabled = stateconfig.Name == "Default",
+			Active = false,
+			Priority = stateconfig.Priority,
+			Properties = stateconfig.Properties,
+		}
+		
+		self:Update()
+	end
+end
+
+function statemachine.RemoveState(self: Statemachine, state_name: string)
+	if self.States[state_name] then
+		self.States[state_name] = nil
+		self:Update()
+	end
 end
 
 function statemachine.Update(self: Statemachine)
@@ -90,7 +126,7 @@ function statemachine.Update(self: Statemachine)
 	end)
 	
 	for i, class in self.States do
-		if enabledClasses[1][1] == i then
+		if #enabledClasses > 0 and enabledClasses[1][1] == i then
 			-- highest priority
 			class.Active = true
 			
@@ -119,41 +155,44 @@ function statemachine.Update(self: Statemachine)
 	end
 end
 
-function statemachine.ListenToChange(self: Statemachine, state_name: string)
+function statemachine.ListenToChange(self: Statemachine, state_name: string): RBXScriptSignal
 	return self.States[state_name].Signal
 end
 
-function statemachine.AddCheck(self: Statemachine, state_name: string, checkId: any, checkFunction: any)
-	local class = self.States[state_name]
-	if not class then return end
-
-	class.Checks[checkId] = checkFunction
+function statemachine.AddCheck(self: Statemachine, state_name: string, checkId: any, checkFunction: () -> ())
+	if self.States[state_name] then
+		self.Checks[checkId] = checkFunction
+	else
+		warn("Could not find a state with this name:", state_name)
+	end
 end
 
-function statemachine.RemoveCheck(self: Statemachine, state_name: string, checkId: any)
-	local class = self.States[state_name]
-	if not class then return end
-
-	class.Checks[checkId] = nil
+function statemachine.RemoveCheck(self: Statemachine, state_name: string, checkId: () -> ())
+	if self.States[state_name] then
+		self.Checks[checkId] = nil
+	else
+		warn("Could not find a state with this name:", state_name)
+	end
 end
 
 function statemachine.CanActivate(self: Statemachine, state_name: string)
-	local class = self.States[state_name]
-	if not class then return end
-	
-	local priority = class.Priority
-	local highestPrioritiy = 0
-	
-	for i, v in self.States do
-		if v.Enabled and v.Allowed and v.Priority >= highestPrioritiy then
-			highestPrioritiy = v.Priority
+	if self.States[state_name] then
+		local priority = self.Priority
+		local highestPrioritiy = 0
+
+		for i, v in self.States do
+			if v.Enabled and v.Allowed and v.Priority >= highestPrioritiy then
+				highestPrioritiy = v.Priority
+			end
 		end
-	end
-	
-	if priority > highestPrioritiy then
-		return true
+
+		if priority > highestPrioritiy then
+			return true
+		else
+			return self.Active
+		end
 	else
-		return class.Active
+		warn("Could not find a state with this name:", state_name)
 	end
 end
 
@@ -163,7 +202,7 @@ function statemachine.SetEnabled(self: Statemachine, state_name: string, enabled
 		self:Update()
 		return self.States[state_name].Active
 	else
-		warn("Could not find a priority class named:", state_name)
+		warn("Could not find a state with this name:", state_name)
 	end
 end
 
@@ -177,5 +216,6 @@ if RunService:IsClient() then
 end
 
 export type Statemachine = typeof(module.GetClass(script))
+export type Stateconfig = typeof(setmetatable({}, stateconfig))
 
 return module
