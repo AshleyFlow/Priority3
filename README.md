@@ -41,9 +41,15 @@ https://github.com/HighFlowey/Priority3/releases/tag/Release
 
 * module.GetClass( object: Instance ): **class**
 
+* module.CreateStateConfig(info: {} | nil): Stateconfig
+
 ### **Methods**
 
 * class:SetEnabled( state_name: string, enabled: boolean ): **boolean** --> enables/disables the state and returns its active property
+
+* class:AddState(config: Stateconfig): void
+
+* class:RemoveState(state_name: string): void
 
 * class:Update(): **void** --> use this after manually changing properties of a state
 
