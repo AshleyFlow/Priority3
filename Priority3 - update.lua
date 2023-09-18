@@ -22,7 +22,7 @@ function module.CreateStateConfig(info: {}): Stateconfig
 	return setmetatable(info, stateconfig)
 end
 
-function module.CreateClass(humanoid: Humanoid): Statemachine
+function module.CreateClass(humanoid: any): Statemachine
 	local class = setmetatable({}, statemachine)
 	
 	class.Humanoid = humanoid
@@ -57,24 +57,29 @@ function module.CreateClass(humanoid: Humanoid): Statemachine
 	end)
 	
 	for name, config in HumanoidProperties do
-		local config = {
-			Name = name,
+		class.States[name] = {
+			Checks = {},
+			Signal = Signal.new(),
+			PrevEnabled = false,
+			PrevActive = false,
+			Allowed = true, -- checks
+			Enabled = false,
+			Active = false,
 			Priority = config.Priority,
-			Properties = config.Properties
+			Properties = config.Properties,
 		}
-		
-		local newConfig = setmetatable(config, stateconfig)
-		class:AddState(newConfig)
 	end
 	
 	class.Priorities = class.States
+	class:SetEnabled("Default", true)
+	class:Update()
 	
 	module.Classes[humanoid] = class
 	
 	return class
 end
 
-function module.GetClass(humanoid: Humanoid): Statemachine
+function module.GetClass(humanoid: any): Statemachine
 	local existingClass = module.Classes[humanoid]
 	
 	return existingClass or module.CreateClass(humanoid)
@@ -185,7 +190,7 @@ function statemachine.CanActivate(self: Statemachine, state_name: string)
 				highestPrioritiy = v.Priority
 			end
 		end
-
+		print(priority, highestPrioritiy)
 		if priority > highestPrioritiy then
 			return true
 		else
