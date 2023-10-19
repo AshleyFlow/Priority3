@@ -1,3 +1,6 @@
+# <div align="center">Version4</div>
+https://github.com/HighFlowey/Priority4/releases
+
 # <div align="center">Priority3 [statemachine]</div>
 ## Priority based state machine for Roblox
 <hr>
