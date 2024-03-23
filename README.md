@@ -1,5 +1,5 @@
-# <div align="center">Version4</div>
-https://github.com/HighFlowey/Priority4/releases
+# <div align="center">deprecated in favor of priority 5</div>
+https://github.com/HighFlowey/Priority
 
 # <div align="center">Priority3 [statemachine]</div>
 ## Priority based state machine for Roblox
